@@ -41,15 +41,15 @@ export default function ScannedProductDisplay({
     return (
       <div style={styles.container}>
         <div style={styles.emptyField}>
-          <p style={styles.label}>② コード表示エリア</p>
+          <p style={styles.label}>コード</p>
           <p style={styles.emptyValue}>---</p>
         </div>
         <div style={styles.emptyField}>
-          <p style={styles.label}>③ 名称表示エリア</p>
+          <p style={styles.label}>商品名</p>
           <p style={styles.emptyValue}>---</p>
         </div>
         <div style={styles.emptyField}>
-          <p style={styles.label}>④ 単価表示エリア</p>
+          <p style={styles.label}>価格</p>
           <p style={styles.emptyValue}>---</p>
         </div>
       </div>
@@ -59,15 +59,15 @@ export default function ScannedProductDisplay({
   return (
     <div style={styles.container}>
       <div style={styles.field}>
-        <p style={styles.label}>② コード表示エリア</p>
+        <p style={styles.label}>コード</p>
         <p style={styles.value}>{product.CODE}</p>
       </div>
       <div style={styles.field}>
-        <p style={styles.label}>③ 名称表示エリア</p>
+        <p style={styles.label}>商品名</p>
         <p style={styles.value}>{product.NAME}</p>
       </div>
       <div style={styles.field}>
-        <p style={styles.label}>④ 単価表示エリア</p>
+        <p style={styles.label}>価格</p>
         <p style={styles.priceValue}>¥{product.PRICE.toLocaleString()}</p>
       </div>
       <button
