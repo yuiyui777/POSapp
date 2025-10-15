@@ -73,11 +73,25 @@ npm run dev
 
 Azure Database for MySQLのセットアップ手順は [docs/azure-database-setup.md](docs/azure-database-setup.md) を参照してください。
 
+## API エンドポイント
+
+### 商品管理
+- `GET /api/products/` - 商品一覧取得
+- `GET /api/products/{product_id}` - 商品詳細（ID指定）
+- `GET /api/products/code/{code}` - 商品コード検索
+
+### 購入処理 ⭐
+- `POST /api/purchase` - 購入処理（取引をDBに保存）
+
+### システム
+- `GET /` - API情報
+- `GET /health` - ヘルスチェック
+
 ## API ドキュメント
 
 バックエンドを起動後、以下のURLでAPIドキュメントにアクセスできます：
 
-- Swagger UI: http://localhost:8000/docs
+- Swagger UI: http://localhost:8000/docs ⭐
 - ReDoc: http://localhost:8000/redoc
 
 ## 開発ワークフロー
