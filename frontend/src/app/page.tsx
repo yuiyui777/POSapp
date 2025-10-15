@@ -52,6 +52,12 @@ export default function Home() {
 
         <div style={styles.links}>
           <a 
+            href="/pos"
+            style={styles.linkPrimary}
+          >
+            🛒 POSレジ画面
+          </a>
+          <a 
             href="/scanner"
             style={styles.link}
           >
@@ -137,9 +143,21 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   links: {
     display: 'flex',
+    flexWrap: 'wrap',
     gap: '16px',
     justifyContent: 'center',
     marginTop: '30px',
+  },
+  linkPrimary: {
+    padding: '15px 30px',
+    backgroundColor: '#ff9800',
+    color: 'white',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
+    transition: 'background-color 0.2s',
+    boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
   },
   link: {
     padding: '12px 24px',
