@@ -52,6 +52,12 @@ export default function Home() {
 
         <div style={styles.links}>
           <a 
+            href="/scanner"
+            style={styles.link}
+          >
+            📷 バーコードスキャナー
+          </a>
+          <a 
             href="http://localhost:8000/docs" 
             target="_blank" 
             rel="noopener noreferrer"
@@ -60,7 +66,7 @@ export default function Home() {
             📚 API ドキュメント
           </a>
           <a 
-            href="https://github.com" 
+            href="https://github.com/yuiyui777/POSapp" 
             target="_blank" 
             rel="noopener noreferrer"
             style={styles.link}
