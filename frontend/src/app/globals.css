@@ -16,6 +16,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f8f8;
 }
 
 a {
@@ -24,6 +25,48 @@ a {
 }
 
 a:hover {
-  opacity: 0.8;
+  transform: translateY(-1px);
+  transition: transform 0.2s;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  transition: transform 0.2s;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0px);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  /* タブレット以下 */
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  h2 {
+    font-size: 1.3rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* スマートフォン */
+  body {
+    font-size: 14px;
+  }
+  
+  h1 {
+    font-size: 1.8rem !important;
+  }
+  
+  h2 {
+    font-size: 1.2rem !important;
+  }
+  
+  button {
+    font-size: 1rem !important;
+    padding: 14px !important;
+  }
 }
 
