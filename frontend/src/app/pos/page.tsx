@@ -73,7 +73,7 @@ export default function POSPage() {
   }
 
   // 購入処理
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     if (cart.length === 0) return
 
     const message = `
@@ -84,13 +84,50 @@ export default function POSPage() {
 合計金額（税込）: ¥${totalWithTax.toLocaleString()}
     `
     
-    if (window.confirm(message)) {
-      // ここで取引をDBに保存する処理を実装（後のステップ）
-      alert(`購入完了！\n\n合計金額（税込）: ¥${totalWithTax.toLocaleString()}\n合計金額（税抜）: ¥${totalAmount.toLocaleString()}`)
+    if (!window.confirm(message)) {
+      return // キャンセルされた場合は何もしない
+    }
+
+    // APIに購入データを送信
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const response = await fetch(`${apiUrl}/api/purchase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: cart.map(product => ({
+            PRD_ID: product.PRD_ID,
+            CODE: product.CODE,
+            NAME: product.NAME,
+            PRICE: product.PRICE
+          }))
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`購入処理に失敗しました (ステータス: ${response.status})`)
+      }
+
+      const data = await response.json()
+      
+      // 購入完了のアラート
+      alert(
+        `購入完了！\n\n` +
+        `取引ID: ${data.transaction_id}\n` +
+        `商品点数: ${data.items_count} 点\n` +
+        `合計金額（税込）: ¥${totalWithTax.toLocaleString()}\n` +
+        `合計金額（税抜）: ¥${data.total_amount.toLocaleString()}`
+      )
       
       // カートをクリア
       setCart([])
       setScannedProduct(null)
+      
+    } catch (err) {
+      console.error('Purchase error:', err)
+      alert(`エラー: ${err instanceof Error ? err.message : '購入処理に失敗しました'}`)
     }
   }
 

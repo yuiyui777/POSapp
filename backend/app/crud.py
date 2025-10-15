@@ -5,11 +5,13 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 import sys
 from pathlib import Path
+from datetime import datetime
 
 # プロジェクトルートをパスに追加
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from models import ProductMaster, Transaction, TransactionDetail
+from app import schemas
 
 
 # ==================== Product CRUD ====================
@@ -126,4 +128,48 @@ def create_transaction_detail(
     db.commit()
     db.refresh(db_detail)
     return db_detail
+
+
+# ==================== Purchase CRUD ====================
+
+def create_purchase(db: Session, purchase_request: schemas.PurchaseRequest) -> Transaction:
+    """
+    購入処理を実行
+    APIファンクション(Lv2)の仕様を実装
+    """
+    # 1-1. 取引テーブルへ登録する
+    # とりあえず合計金額0でヘッダーを作成
+    new_transaction = Transaction(
+        DATETIME=datetime.utcnow(),
+        EMP_CD=purchase_request.emp_cd or '999999999',  # 仕様書より固定値またはリクエストから
+        STORE_CD=purchase_request.store_cd or '30',     # 仕様書より固定値またはリクエストから
+        POS_NO=purchase_request.pos_no or '90',         # 仕様書より固定値またはリクエストから
+        TOTAL_AMT=0,
+        TTL_AMT_EX_TAX=0,
+    )
+    db.add(new_transaction)
+    db.flush()  # これで new_transaction.TRD_ID が採番される
+
+    total_amount = 0
+
+    # 1-2. 取引明細へ登録する
+    for index, item in enumerate(purchase_request.items):
+        new_detail = TransactionDetail(
+            TRD_ID=new_transaction.TRD_ID,
+            DTL_ID=index + 1,  # 明細IDは1から連番
+            PRD_ID=item.PRD_ID,
+            PRD_CODE=item.CODE,
+            PRD_NAME=item.NAME,
+            PRD_PRICE=item.PRICE,
+            TAX_CD='10'  # 仕様書より固定値（消費税10%）
+        )
+        db.add(new_detail)
+        total_amount += item.PRICE
+
+    # 1-3. 合計や税金額を計算する (今回は合計金額のみ)
+    # 1-4. 取引テーブルを更新する
+    new_transaction.TOTAL_AMT = total_amount
+    new_transaction.TTL_AMT_EX_TAX = total_amount  # 税計算は未実装のため同額
+
+    return new_transaction
 

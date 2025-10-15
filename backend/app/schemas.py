@@ -3,7 +3,7 @@ Pydantic schemas for API request/response models
 """
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class Product(BaseModel):
@@ -50,4 +50,31 @@ class TransactionDetail(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# === 購入API用のスキーマ ===
+
+class PurchaseItem(BaseModel):
+    """購入リクエストで受け取る商品リストの各アイテム"""
+    PRD_ID: int
+    CODE: str
+    NAME: str
+    PRICE: int
+
+
+class PurchaseRequest(BaseModel):
+    """購入リクエストの全体"""
+    items: List[PurchaseItem]
+    emp_cd: Optional[str] = None
+    store_cd: Optional[str] = None
+    pos_no: Optional[str] = None
+
+
+class PurchaseResponse(BaseModel):
+    """購入レスポンス"""
+    success: bool
+    transaction_id: int
+    total_amount: int
+    total_amount_ex_tax: int
+    items_count: int
 
