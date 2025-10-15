@@ -11,6 +11,9 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 from config import settings
 from database import Base
 
+# モデルをインポート（マイグレーション検出のため）
+import models
+
 # Alembic Config オブジェクト
 config = context.config
 
@@ -62,6 +65,7 @@ def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"ssl": {"ca": None}}  # Azure MySQLのSSL接続
     )
 
     with connectable.connect() as connection:

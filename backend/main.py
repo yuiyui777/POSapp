@@ -4,6 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from config import settings
 from database import get_db
+from routers import products
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -19,6 +20,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ルーターを登録
+app.include_router(products.router)
 
 
 @app.get("/")

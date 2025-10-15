@@ -10,9 +10,7 @@ engine = create_engine(
     pool_pre_ping=True,  # 接続の健全性チェック
     pool_recycle=3600,   # 1時間ごとに接続をリサイクル
     connect_args={
-        "ssl": {
-            "ssl_mode": "REQUIRED"  # Azure MySQLはSSL必須
-        }
+        "ssl": {"ca": None}  # Azure MySQLはSSL必須（証明書検証なし）
     }
 )
 
