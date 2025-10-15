@@ -6,51 +6,45 @@ FastAPIベースのPOSシステムバックエンドAPI
 
 ```
 backend/
-├── app/                     # 新しいアプリケーション構造
-│   ├── __init__.py
-│   ├── main.py             # 商品コード検索API (Port 8001)
-│   ├── crud.py             # データベース操作
-│   └── schemas.py          # Pydanticスキーマ
-├── models/                  # SQLAlchemyモデル
+├── main.py              # ✅ FastAPIメインアプリ（Port 8000）
+├── config.py            # 設定管理
+├── database.py          # データベース接続
+├── app/
+│   ├── crud.py         # ✅ データベースCRUD操作
+│   └── schemas.py      # ✅ Pydanticスキーマ
+├── models/              # SQLAlchemyモデル
 │   ├── product_master.py
 │   ├── transaction.py
 │   └── transaction_detail.py
-├── routers/                 # APIルーター
-│   └── products.py
-├── alembic/                 # マイグレーション
-├── tests/                   # テスト
-│   ├── test_main.py
-│   └── MANUAL_TESTS.md     # 手動テスト手順
-├── main.py                  # メインAPI (Port 8000)
-├── database.py              # データベース接続
-├── config.py                # 設定
-├── seed_data.py             # テストデータ投入
-└── requirements.txt
+├── routers/             # APIルーター
+│   └── products.py     # 商品関連エンドポイント
+├── alembic/             # データベースマイグレーション
+├── tests/               # テストコード
+└── seed_data.py         # テストデータ投入スクリプト
 ```
 
-## 2つのAPIサーバー
+## 設計思想
 
-### 1. メインAPI (Port 8000)
-元のAPIサーバー - 複数のエンドポイントを提供
+### レイヤーアーキテクチャ
 
-```bash
-cd backend
-source venv/bin/activate
-uvicorn main:app --reload --port 8000
+```
+main.py (FastAPI)
+    ↓
+routers/ (エンドポイント定義)
+    ↓
+app/crud.py (ビジネスロジック)
+    ↓
+models/ (データモデル)
+    ↓
+database.py (DB接続)
 ```
 
-アクセス: http://localhost:8000/docs
+### ベストプラクティス
 
-### 2. 商品コード検索API (Port 8001)
-新しいAPI - 商品コード検索に特化
-
-```bash
-cd backend
-source venv/bin/activate
-python -m uvicorn app.main:app --reload --port 8001
-```
-
-アクセス: http://localhost:8001/docs
+- ✅ **単一責任の原則**: 各ファイルが明確な責任を持つ
+- ✅ **CRUD分離**: DB操作は`app/crud.py`に集約
+- ✅ **スキーマ検証**: `app/schemas.py`でデータ検証
+- ✅ **ルーター分離**: 機能ごとに`routers/`で管理
 
 ## セットアップ
 
@@ -69,16 +63,14 @@ pip install -r requirements.txt
 
 ### 3. 環境変数の設定
 
-`.env.example` を `.env` にコピーして編集：
-
 ```bash
 cp .env.example .env
 ```
 
-`.env` ファイルの内容例：
+`.env` ファイルを編集：
 
-```
-DATABASE_URL=mysql+pymysql://username:password@your-azure-mysql.mysql.database.azure.com:3306/posdb
+```env
+DATABASE_URL=mysql+pymysql://username:password@hostname:3306/yui
 APP_NAME=POS API
 DEBUG=True
 ```
@@ -86,10 +78,7 @@ DEBUG=True
 ### 4. データベースマイグレーション
 
 ```bash
-# マイグレーションの初期化（最初の1回のみ）
-alembic revision --autogenerate -m "initial migration"
-
-# マイグレーションの適用
+# マイグレーションを適用
 alembic upgrade head
 ```
 
@@ -101,7 +90,7 @@ python seed_data.py
 
 ## 起動方法
 
-### メインAPI（Port 8000）
+### 開発サーバー
 
 ```bash
 uvicorn main:app --reload
@@ -113,31 +102,56 @@ uvicorn main:app --reload
 python main.py
 ```
 
-サーバーは http://localhost:8000 で起動します。
-
-### 商品コード検索API（Port 8001）
-
-```bash
-python -m uvicorn app.main:app --reload --port 8001
-```
-
-サーバーは http://localhost:8001 で起動します。
+サーバーは **http://localhost:8000** で起動します。
 
 ## API エンドポイント
 
-### メインAPI (Port 8000)
+### システム
 
-- `GET /` - ルート
+- `GET /` - ルート（API情報）
 - `GET /health` - ヘルスチェック
-- `GET /api/products/` - 商品一覧
-- `GET /api/products/{product_id}` - 商品詳細（ID）
-- `GET /api/products/code/{code}` - 商品詳細（コード）
 
-### 商品コード検索API (Port 8001)
+### 商品管理
 
-- `GET /` - ルート
-- `GET /products/{product_code}` - 商品コード検索 ⭐ **メイン機能**
-- `GET /api/products/list` - 商品一覧
+- `GET /api/products/` - 商品一覧取得
+- `GET /api/products/{product_id}` - 商品詳細（ID指定）
+- `GET /api/products/code/{code}` - 商品詳細（コード指定）⭐
+
+### パラメータ
+
+**商品一覧取得**:
+- `skip` (int): スキップする件数（デフォルト: 0）
+- `limit` (int): 取得する最大件数（デフォルト: 100）
+
+## 使用例
+
+### 商品コード検索
+
+```bash
+curl http://localhost:8000/api/products/code/4589901001018
+```
+
+レスポンス:
+```json
+{
+  "PRD_ID": 1,
+  "CODE": "4589901001018",
+  "NAME": "テクワン・消せるボールペン 黒",
+  "PRICE": 180
+}
+```
+
+### 商品一覧取得
+
+```bash
+curl "http://localhost:8000/api/products/?skip=0&limit=10"
+```
+
+### ヘルスチェック
+
+```bash
+curl http://localhost:8000/health
+```
 
 ## テスト
 
@@ -145,35 +159,31 @@ python -m uvicorn app.main:app --reload --port 8001
 
 ```bash
 # 商品コード検索
-curl http://localhost:8001/products/4589901001018
+curl http://localhost:8000/api/products/code/4589901001018
 
 # 商品一覧
-curl http://localhost:8001/api/products/list
+curl http://localhost:8000/api/products/
 ```
 
-詳細は `tests/MANUAL_TESTS.md` を参照してください。
+詳細は `tests/MANUAL_TESTS.md` を参照。
 
 ### 自動テスト
 
 ```bash
-pytest tests/test_main.py -v
+pytest tests/ -v
 ```
 
 ## 開発ガイド
 
-### 新しいCRUD操作を追加
+### 新しいエンドポイントを追加
 
-`app/crud.py` に関数を追加：
-
+1. **CRUD操作を定義** (`app/crud.py`):
 ```python
 def get_something(db: Session, id: int):
     return db.query(Model).filter(Model.id == id).first()
 ```
 
-### 新しいスキーマを追加
-
-`app/schemas.py` にPydanticモデルを追加：
-
+2. **スキーマを定義** (`app/schemas.py`):
 ```python
 class Something(BaseModel):
     id: int
@@ -183,12 +193,9 @@ class Something(BaseModel):
         from_attributes = True
 ```
 
-### 新しいエンドポイントを追加
-
-`app/main.py` にエンドポイントを追加：
-
+3. **ルーターを作成** (`routers/something.py`):
 ```python
-@app.get("/something/{id}", response_model=schemas.Something)
+@router.get("/{id}", response_model=schemas.Something)
 def get_something(id: int, db: Session = Depends(get_db)):
     result = crud.get_something(db, id)
     if not result:
@@ -196,28 +203,110 @@ def get_something(id: int, db: Session = Depends(get_db)):
     return result
 ```
 
-### マイグレーション
+4. **main.pyに登録**:
+```python
+from routers import something
+app.include_router(something.router)
+```
+
+### データベースマイグレーション
 
 ```bash
-# 新しいマイグレーションを作成
-alembic revision --autogenerate -m "説明メッセージ"
+# 新しいマイグレーション作成
+alembic revision --autogenerate -m "説明"
 
-# マイグレーションを適用
+# マイグレーション適用
 alembic upgrade head
 
 # ロールバック
 alembic downgrade -1
+
+# 履歴確認
+alembic history
 ```
 
 ## APIドキュメント
 
-各APIサーバー起動後、以下のURLでSwagger UIにアクセス：
+サーバー起動後、以下のURLでSwagger UIにアクセス：
 
-- メインAPI: http://localhost:8000/docs
-- 商品コード検索API: http://localhost:8001/docs
+**http://localhost:8000/docs**
 
-## ヘルスチェック
+## トラブルシューティング
+
+### データベース接続エラー
 
 ```bash
-curl http://localhost:8000/health
+# 接続情報を確認
+cat .env
+
+# 接続テスト
+python -c "from database import engine; engine.connect()"
 ```
+
+### ポート既に使用中
+
+```bash
+# プロセスを確認
+lsof -i :8000
+
+# 強制終了
+pkill -f "uvicorn main:app"
+```
+
+### マイグレーションエラー
+
+```bash
+# 現在のバージョン確認
+alembic current
+
+# 最新に更新
+alembic upgrade head
+```
+
+## コード品質
+
+### リンター
+
+```bash
+# flake8
+pip install flake8
+flake8 .
+
+# black (フォーマッター)
+pip install black
+black .
+```
+
+### 型チェック
+
+```bash
+pip install mypy
+mypy .
+```
+
+## パフォーマンス
+
+- **データベース接続プール**: SQLAlchemyで自動管理
+- **SSL接続**: Azure MySQL用に最適化
+- **インデックス**: 商品コード（CODE）にUNIQUEインデックス
+
+## セキュリティ
+
+- ✅ 環境変数で接続情報管理
+- ✅ SSL/TLS接続必須
+- ✅ CORS設定
+- ✅ 入力検証（Pydantic）
+
+## 次のステップ
+
+1. 取引登録API実装
+2. 取引明細API実装
+3. 認証・認可機能
+4. ロギング強化
+5. キャッシング
+
+## 関連ドキュメント
+
+- [データベーススキーマ設計書](../docs/database-schema.md)
+- [開発環境セットアップ](../docs/development.md)
+- [Azure MySQL セットアップ](../docs/azure-database-setup.md)
