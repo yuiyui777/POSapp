@@ -21,15 +21,14 @@ export default function BarcodeScannerComponent({ onScan, isScanning }: BarcodeS
 
   return (
     <div style={styles.container}>
-      {isScanning ? (
-        <div style={styles.videoContainer}>
-          <video ref={ref} style={styles.video} />
-        </div>
-      ) : (
-        <div style={styles.placeholder}>
-          <p style={styles.placeholderText}>スキャン待機中...</p>
-        </div>
-      )}
+      <div style={styles.videoContainer}>
+        <video ref={ref} style={styles.video} />
+        {!isScanning && (
+          <div style={styles.overlay}>
+            <p style={styles.overlayText}>スキャン待機中...</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -44,6 +43,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '20px',
   },
   videoContainer: {
+    position: 'relative',
     width: '100%',
   },
   video: {
@@ -51,16 +51,22 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: 'auto',
     display: 'block',
   },
-  placeholder: {
-    height: '300px',
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backdropFilter: 'blur(5px)',
   },
-  placeholderText: {
+  overlayText: {
     fontSize: '1.2rem',
-    color: '#666',
+    color: 'white',
+    fontWeight: 'bold',
   },
 }
 

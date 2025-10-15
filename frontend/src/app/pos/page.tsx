@@ -15,7 +15,7 @@ interface Product {
 
 export default function POSPage() {
   // --- 状態管理 (State) ---
-  const [isScanning, setIsScanning] = useState(false) // スキャナがアクティブか
+  const [isScanning, setIsScanning] = useState(true) // スキャナがアクティブか（初期状態で有効）
   const [scannedProduct, setScannedProduct] = useState<Product | null>(null) // スキャンで取得した商品
   const [cart, setCart] = useState<Product[]>([]) // 購入リスト（カート）
   const [isLoading, setIsLoading] = useState(false)
@@ -68,6 +68,7 @@ export default function POSPage() {
     if (productToAdd) {
       setCart(prevCart => [...prevCart, productToAdd])
       setScannedProduct(null) // 追加後は表示をクリア
+      setIsScanning(true) // スキャナーを再開
     }
   }
 
@@ -101,17 +102,19 @@ export default function POSPage() {
       </header>
 
       <main style={styles.main}>
-        {/* ① バーコードスキャンボタン */}
-        <button
-          onClick={() => setIsScanning(true)}
-          disabled={isScanning}
-          style={{
-            ...styles.scanButton,
-            ...(isScanning ? styles.scanButtonDisabled : {})
-          }}
-        >
-          {isScanning ? '📷 スキャン中...' : '① スキャン (カメラ)'}
-        </button>
+        {/* ① バーコードスキャン状態表示 */}
+        <div style={styles.scanStatus}>
+          {isScanning ? (
+            <div style={styles.scanningStatus}>
+              <span style={styles.scanningIcon}>📷</span>
+              <span>スキャン準備完了 - バーコードをかざしてください</span>
+            </div>
+          ) : (
+            <div style={styles.pausedStatus}>
+              <span>⏸️ スキャン一時停止中</span>
+            </div>
+          )}
+        </div>
 
         {/* バーコードスキャナー */}
         <BarcodeScannerComponent onScan={handleScan} isScanning={isScanning} />
@@ -185,22 +188,32 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '8px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
-  scanButton: {
+  scanStatus: {
     width: '100%',
-    padding: '18px',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    backgroundColor: '#4caf50',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
+    padding: '15px',
     marginBottom: '15px',
-    transition: 'background-color 0.2s',
+    borderRadius: '8px',
+    textAlign: 'center',
+    fontSize: '1.1rem',
+    fontWeight: 'bold',
   },
-  scanButtonDisabled: {
-    backgroundColor: '#9e9e9e',
-    cursor: 'not-allowed',
+  scanningStatus: {
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    padding: '10px',
+    borderRadius: '6px',
+    border: '2px solid #4caf50',
+  },
+  scanningIcon: {
+    marginRight: '10px',
+    fontSize: '1.3rem',
+  },
+  pausedStatus: {
+    backgroundColor: '#fff3e0',
+    color: '#f57c00',
+    padding: '10px',
+    borderRadius: '6px',
+    border: '2px solid #ff9800',
   },
   purchaseButtonContainer: {
     marginTop: '30px',
