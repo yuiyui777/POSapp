@@ -18,9 +18,17 @@ app = FastAPI(
 )
 
 # CORS設定（フロントエンドからのアクセスを許可）
+origins = [
+    "http://localhost:3000",  # 開発環境
+]
+
+# 本番環境のフロントエンドURLを追加
+if settings.FRONTEND_URL:
+    origins.append(settings.FRONTEND_URL)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Next.jsのデフォルトポート
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

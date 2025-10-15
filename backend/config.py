@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "POS API"
     DEBUG: bool = False
     
+    # CORS設定
+    FRONTEND_URL: Optional[str] = None
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

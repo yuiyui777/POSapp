@@ -83,6 +83,25 @@ npm run dev
 
 Azure Database for MySQLのセットアップ手順は [docs/azure-database-setup.md](docs/azure-database-setup.md) を参照してください。
 
+## Azureへのデプロイ
+
+本番環境へのデプロイ手順については、以下のドキュメントを参照してください：
+
+- **[Azure デプロイガイド](docs/azure-deployment-guide.md)** - 詳細な手順とベストプラクティス
+- **[デプロイチェックリスト](docs/deployment-checklist.md)** - デプロイ前の確認事項
+
+### クイックスタート
+
+```bash
+# 1. バックエンドをAzure App Serviceにデプロイ
+az webapp create --name pos-backend-app --resource-group pos-system-rg --runtime "PYTHON:3.11"
+
+# 2. フロントエンドをAzure Static Web Appsにデプロイ
+az staticwebapp create --name pos-frontend --resource-group pos-system-rg --source https://github.com/YOUR_USERNAME/POSapp
+
+# 詳細は上記ドキュメント参照
+```
+
 ## API エンドポイント
 
 ### 商品管理
